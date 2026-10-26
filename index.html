@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Carnicería - Control y Estadísticas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #991b1b;
+            --primary-light: #fef2f2;
+            --accent: #b91c1c;
+            --success: #059669;
+            --success-light: #ecfdf5;
+            --warning: #d97706;
+            --warning-light: #fffbeb;
+            --danger: #dc2626;
+            --danger-light: #fef2f2;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 12px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+        }
+        
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 16px;
+        }
+
+        header {
+            max-width: 1400px;
+            margin: 0 auto 16px auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.3rem;
+            color: var(--primary);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tasa-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--primary-light);
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .tasa-container.paralelo {
+            background: #fff7ed;
+            color: #c2410c;
+            border: 1px solid #fed7aa;
+        }
+
+        .tasa-container input {
+            width: 75px;
+            padding: 4px;
+            border: 1px solid #fca5a5;
+            border-radius: 6px;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .tasa-container.paralelo input { border-color: #fdba74; }
+
+        .btn-sync {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 0;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 6px;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 8px;
+            width: 100%;
+            justify-content: space-around;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            padding: 8px 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; }
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 1024px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 18px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+        }
+
+        h2 {
+            font-size: 1rem;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: var(--text);
+            border-bottom: 2px solid var(--bg);
+            padding-bottom: 8px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .form-group { margin-bottom: 10px; }
+        .form-group.full { grid-column: span 2; }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background-color: #fff;
+            color: var(--text);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(153, 27, 27, 0.1);
+        }
+
+        button.btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+
+        button.btn:hover { background-color: var(--accent); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-box {
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; bottom: 0;
+            width: 4px;
+            background: var(--primary);
+        }
+
+        .stat-box.green::before { background: var(--success); }
+        .stat-box.orange::before { background: var(--warning); }
+        .stat-box.blue::before { background: #2563eb; }
+
+        .stat-box h3 {
+            margin: 0;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .stat-box p {
+            margin: 6px 0 0 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .stat-box span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: block;
+            margin-top: 2px;
+        }
+
+        .search-box {
+            margin-bottom: 12px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 8px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: left;
+            background: #fff;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .badge {
+            display: inline-flex;
+            padding: 2px 6px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        .badge-excelente { background: var(--success-light); color: var(--success); }
+        .badge-regular { background: var(--warning-light); color: var(--warning); }
+        .badge-riesgo { background: var(--primary-light); color: var(--danger); }
+        .badge-ingreso { background: var(--success-light); color: var(--success); }
+        .badge-perdida { background: var(--danger-light); color: var(--danger); }
+
+        .currency-usd { font-weight: 700; color: var(--text); }
+        .currency-ves { font-size: 0.75rem; color: var(--text-muted); }
+
+        .actions-group {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        .btn-action {
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-fiar { background-color: var(--warning); color: white; flex: 1; }
+        .btn-pagar { background-color: var(--success); color: white; flex: 1; }
+        .btn-hist { background-color: #2563eb; color: white; }
+        .btn-del { background: #fee2e2; color: var(--danger); padding: 6px 8px; }
+        .btn-action:hover { opacity: 0.85; }
+
+        .chart-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .chart-bar-wrap {
+            background: #f1f5f9;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+        }
+        .chart-bar-fill {
+            position: absolute;
+            top: 0; left: 0; bottom: 0;
+            background: var(--primary);
+            transition: width 0.5s ease;
+            opacity: 0.2;
+        }
+        .chart-bar-fill.green { background: var(--success); }
+        .chart-bar-fill.orange { background: var(--warning); }
+        .chart-bar-label {
+            position: relative;
+            z-index: 1;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center;
+            z-index: 1000; display: none;
+        }
+        .modal-box {
+            background: white; padding: 20px; border-radius: 12px; width: 92%; max-width: 450px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            max-height: 85vh; overflow-y: auto;
+        }
+        .modal-box h3 { margin-top: 0; color: var(--primary); font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🥩 Carnicería</h1>
+        <div class="header-right">
+            <div class="tasa-container">
+                <span>BCV:</span>
+                <input type="number" step="0.01" id="tasa-bcv" value="887.30">
+                <button class="btn-sync" onclick="consultarBcvOnline()">🔄</button>
+            </div>
+            <div class="tasa-container paralelo">
+                <span>Par:</span>
+                <input type="number" step="0.01" id="tasa-paralelo" value="900.00">
+            </div>
+        </div>
+        <div class="nav-tabs">
+            <button class="nav-btn active" onclick="cambiarVista('control', this)">🛒 Control</button>
+            <button class="nav-btn" onclick="cambiarVista('finanzas', this)">💰 Caja</button>
+            <button class="nav-btn" onclick="cambiarVista('estadisticas', this)">📊 Stats</button>
+            <button class="nav-btn" onclick="cambiarVista('respaldo', this)">💾 Respaldo</button>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- VISTA 1: CONTROL -->
+        <div id="vista-control" class="view-section active">
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <h3>Artículos</h3>
+                    <p id="stat-articulos">0</p>
+                </div>
+                <div class="stat-box blue">
+                    <h3>Clientes</h3>
+                    <p id="stat-clientes-total">0</p>
+                </div>
+                <div class="stat-box orange">
+                    <h3>Deuda Total</h3>
+                    <p id="stat-deuda-usd">$0.00</p>
+                    <span id="stat-deuda-bcv">Bs: 0.00</span>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h2>📦 Inventario y Precios</h2>
+                    <div class="form-grid">
+                        <div class="form-group full">
+                            <label>Nombre del Corte</label>
+                            <input type="text" id="nombre-articulo" placeholder="Ej. Bistec">
+                        </div>
+                        <div class="form-group full">
+                            <label>Precio / Kilo ($ USD)</label>
+                            <input type="number" step="0.01" id="precio-articulo" placeholder="0.00">
+                        </div>
+                    </div>
+                    <button class="btn" type="button" onclick="agregarArticulo()">Guardar Artículo</button>
+
+                    <div class="table-responsive">
+                        <table id="tabla-articulos">
+                            <thead>
+                                <tr>
+                                    <th>Artículo</th>
+                                    <th>Precio / Kg</th>
+                                    <th style="width: 35px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>👥 Clientes y Créditos</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nombre</label>
+                            <input type="text" id="nombre-cliente" placeholder="Ej. Juan Pérez">
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono</label>
+                            <input type="text" id="telefono-cliente" placeholder="0414...">
+                        </div>
+                    </div>
+                    <button class="btn" type="button" onclick="agregarCliente()">Registrar Cliente</button>
+
+                    <div class="search-box" style="margin-top: 15px;">
+                        <input type="text" id="buscador-clientes" placeholder="🔍 Buscar cliente..." oninput="filtrarClientes()">
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="tabla-clientes">
+                            <thead>
+                                <tr>
+                                    <th>Cliente / Puntaje</th>
+                                    <th>Saldo Pendiente</th>
+                                    <th style="width: 130px;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA 2: FINANZAS / CAJA -->
+        <div id="vista-finanzas" class="view-section">
+            <div class="card" style="max-width: 800px; margin: 0 auto 16px auto;">
+                <h2>📝 Registrar Ingreso o Gasto</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Tipo</label>
+                        <select id="finanza-tipo">
+                            <option value="ingreso">🟢 Ingreso / Venta</option>
+                            <option value="perdida">🔴 Gasto / Pérdida</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" id="finanza-fecha">
+                    </div>
+                    <div class="form-group full">
+                        <label>Descripción</label>
+                        <input type="text" id="finanza-desc" placeholder="Ej. Venta mostrador, hielo...">
+                    </div>
+                    <div class="form-group full">
+                        <label>Monto ($ USD)</label>
+                        <input type="number" step="0.01" id="finanza-monto" placeholder="0.00">
+                    </div>
+                </div>
+                <button class="btn" type="button" onclick="registrarFinanza()">Registrar en Caja</button>
+            </div>
+
+            <div class="card" style="max-width: 800px; margin: 0 auto;">
+                <h2>📋 Movimientos de Caja</h2>
+                <div class="table-responsive">
+                    <table id="tabla-finanzas">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Tipo</th>
+                                <th>Descripción</th>
+                                <th>Monto</th>
+                                <th style="width: 35px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA 3: ESTADÍSTICAS -->
+        <div id="vista-estadisticas" class="view-section">
+            <div class="stats-grid">
+                <div class="stat-box green">
+                    <h3>Ingresos Totales</h3>
+                    <p id="stat-total-ingresos">$0.00</p>
+                    <span id="stat-total-ingresos-bcv">Bs: 0.00</span>
+                </div>
+                <div class="stat-box">
+                    <h3>Gastos / Pérdidas</h3>
+                    <p id="stat-total-perdidas">$0.00</p>
+                    <span id="stat-total-perdidas-bcv">Bs: 0.00</span>
+                </div>
+                <div class="stat-box orange">
+                    <h3>Balance Neto</h3>
+                    <p id="stat-balance-neto">$0.00</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📊 Resumen de Rendimiento y Cortes Más Vendidos</h2>
+                <div class="chart-container">
+                    <div>
+                        <div style="font-size:0.8rem; margin-bottom:4px; font-weight:600;">Ingresos</div>
+                        <div class="chart-bar-wrap">
+                            <div id="bar-ingresos" class="chart-bar-fill green" style="width: 0%;"></div>
+                            <div class="chart-bar-label">
+                                <span id="chart-txt-ingresos">$0.00</span>
+                                <span style="color:var(--success);">Entradas</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.8rem; margin-bottom:4px; font-weight:600;">Gastos</div>
+                        <div class="chart-bar-wrap">
+                            <div id="bar-perdidas" class="chart-bar-fill" style="width: 0%;"></div>
+                            <div class="chart-bar-label">
+                                <span id="chart-txt-perdidas">$0.00</span>
+                                <span style="color:var(--danger);">Salidas</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 25px;">
+                    <strong>Artículos Más Solicitados en Fiados:</strong>
+                    <div class="table-responsive" style="margin-top: 8px;">
+                        <table id="tabla-articulos-vendidos">
+                            <thead>
+                                <tr>
+                                    <th>Corte / Artículo</th>
+                                    <th>Frecuencia</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA 4: RESPALDO -->
+        <div id="vista-respaldo" class="view-section">
+            <div class="card" style="max-width: 600px; margin: 0 auto;">
+                <h2>💾 Respaldo y Google Drive</h2>
+                <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.4;">
+                    Exporta tu respaldo y guárdalo en tu Google Drive personal para proteger los datos de la carnicería.
+                </p>
+
+                <div style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 15px;">
+                    <button class="btn" style="background-color: var(--success);" onclick="exportarRespaldo()">📥 Descargar Archivo de Respaldo</button>
+                    
+                    <input type="file" id="input-archivo-respaldo" accept=".json" style="display:none;" onchange="importarRespaldo(event)">
+                    <button class="btn" style="background-color: var(--warning);" onclick="document.getElementById('input-archivo-respaldo').click()">📤 Subir Archivo para Restaurar</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Fiar -->
+    <div id="modal-fiar" class="modal-overlay">
+        <div class="modal-box">
+            <h3>➕ Registrar Fiado</h3>
+            <div class="form-group">
+                <label>Seleccionar Corte</label>
+                <select id="fiar-articulo-select"></select>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Cantidad</label>
+                    <input type="number" step="0.01" id="fiar-cantidad" placeholder="Ej. 1.5 o 500">
+                </div>
+                <div class="form-group">
+                    <label>Unidad</label>
+                    <select id="fiar-unidad">
+                        <option value="kg">Kilogramos (kg)</option>
+                        <option value="g">Gramos (g)</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 15px;">
+                <button class="btn" style="background-color: var(--success);" onclick="confirmarFiar()">Aceptar</button>
+                <button class="btn" style="background-color: var(--text-muted);" onclick="cerrarModal('modal-fiar')">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Historial de Cliente -->
+    <div id="modal-historial" class="modal-overlay">
+        <div class="modal-box">
+            <h3 id="historial-titulo">Historial del Cliente</h3>
+            <div class="table-responsive" style="max-height: 250px;">
+                <table id="tabla-historial-cliente">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Detalle</th>
+                            <th>Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <button class="btn" style="margin-top: 15px; background-color: var(--text-muted);" onclick="cerrarModal('modal-historial')">Cerrar</button>
+        </div>
+    </div>
+
+    <script>
+        let tasaBCV = parseFloat(localStorage.getItem('carniceria_tasa_bcv')) || 887.30;
+        let tasaParalelo = parseFloat(localStorage.getItem('carniceria_tasa_par')) || 900.00;
+        
+        document.getElementById('tasa-bcv').value = tasaBCV;
+        document.getElementById('tasa-paralelo').value = tasaParalelo;
+        document.getElementById('finanza-fecha').valueAsDate = new Date();
+
+        let articulos = JSON.parse(localStorage.getItem('carniceria_articulos')) || [];
+        let clientes = JSON.parse(localStorage.getItem('carniceria_clientes')) || [];
+        let finanzas = JSON.parse(localStorage.getItem('carniceria_finanzas')) || [];
+        let clienteActivoId = null;
+
+        async function consultarBcvOnline() {
+            try {
+                const response = await fetch('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=bcv');
+                const data = await response.json();
+                if (data && data.monitors && data.monitors.usd) {
+                    const nuevaTasa = parseFloat(data.monitors.usd.price);
+                    if (!isNaN(nuevaTasa) && nuevaTasa > 0) {
+                        tasaBCV = nuevaTasa;
+                        document.getElementById('tasa-bcv').value = tasaBCV;
+                        localStorage.setItem('carniceria_tasa_bcv', tasaBCV);
+                        actualizarVista();
+                        alert(`¡Tasa BCV actualizada: Bs. ${tasaBCV.toFixed(2)}!`);
+                    }
+                }
+            } catch (error) { console.log('Modo offline'); }
+        }
+
+        window.addEventListener('load', () => { consultarBcvOnline(); });
+
+        function cambiarVista(vista, btnElement) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(`vista-${vista}`).classList.add('active');
+            if(btnElement) btnElement.classList.add('active');
+            if (vista === 'estadisticas') actualizarEstadisticasVisuales();
+        }
+
+        document.getElementById('tasa-bcv').addEventListener('input', (e) => {
+            tasaBCV = parseFloat(e.target.value) || 1;
+            localStorage.setItem('carniceria_tasa_bcv', tasaBCV);
+            actualizarVista();
+        });
+
+        document.getElementById('tasa-paralelo').addEventListener('input', (e) => {
+            tasaParalelo = parseFloat(e.target.value) || 1;
+            localStorage.setItem('carniceria_tasa_par', tasaParalelo);
+            actualizarVista();
+        });
+
+        function guardarDatos() {
+            localStorage.setItem('carniceria_articulos', JSON.stringify(articulos));
+            localStorage.setItem('carniceria_clientes', JSON.stringify(clientes));
+            localStorage.setItem('carniceria_finanzas', JSON.stringify(finanzas));
+            actualizarVista();
+        }
+
+        function agregarArticulo() {
+            const nombre = document.getElementById('nombre-articulo').value.trim();
+            const precio = parseFloat(document.getElementById('precio-articulo').value);
+            if (!nombre || isNaN(precio) || precio <= 0) { alert('Ingrese un nombre y precio válido.'); return; }
+            articulos.push({ id: Date.now(), nombre, precio });
+            document.getElementById('nombre-articulo').value = '';
+            document.getElementById('precio-articulo').value = '';
+            guardarDatos();
+        }
+
+        function eliminarArticulo(id) {
+            articulos = articulos.filter(art => art.id !== id);
+            guardarDatos();
+        }
+
+        function agregarCliente() {
+            const nombre = document.getElementById('nombre-cliente').value.trim();
+            const telefono = document.getElementById('telefono-cliente').value.trim();
+            if (!nombre) { alert('Ingrese el nombre del cliente.'); return; }
+            clientes.push({ id: Date.now(), nombre, telefono, saldo: 0, puntaje: 10, historial: [] });
+            document.getElementById('nombre-cliente').value = '';
+            document.getElementById('telefono-cliente').value = '';
+            guardarDatos();
+        }
+
+        function eliminarCliente(id) {
+            if(confirm('¿Eliminar este cliente?')) {
+                clientes = clientes.filter(c => c.id !== id);
+                guardarDatos();
+            }
+        }
+
+        function filtrarClientes() {
+            actualizarVista(document.getElementById('buscador-clientes').value.toLowerCase());
+        }
+
+        function abrirModalFiar(id) {
+            if (articulos.length === 0) { alert('Primero registra artículos en el inventario.'); return; }
+            clienteActivoId = id;
+            const select = document.getElementById('fiar-articulo-select');
+            select.innerHTML = '';
+            articulos.forEach(art => { select.innerHTML += `<option value="${art.id}">${art.nombre} ($${art.precio.toFixed(2)}/kg)</option>`; });
+            document.getElementById('fiar-cantidad').value = '';
+            document.getElementById('modal-fiar').style.display = 'flex';
+        }
+
+        function cerrarModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            if(modalId === 'modal-fiar') clienteActivoId = null;
+        }
+
+        function confirmarFiar() {
+            const cliente = clientes.find(c => c.id === clienteActivoId);
+            if (!cliente) return;
+            const articuloId = parseInt(document.getElementById('fiar-articulo-select').value);
+            const articulo = articulos.find(a => a.id === articuloId);
+            const cantidad = parseFloat(document.getElementById('fiar-cantidad').value);
+            const unidad = document.getElementById('fiar-unidad').value;
+            if (!articulo || isNaN(cantidad) || cantidad <= 0) { alert('Cantidad inválida.'); return; }
+
+            let kilosReales = unidad === 'g' ? cantidad / 1000 : cantidad;
+            let montoUSD = kilosReales * articulo.precio;
+
+            cliente.saldo += montoUSD;
+            cliente.puntaje = Math.max(0, cliente.puntaje - 5);
+            cliente.historial.unshift({ fecha: new Date().toLocaleDateString(), detalle: `${cantidad}${unidad} de ${articulo.nombre}`, monto: montoUSD, articuloNombre: articulo.nombre });
+
+            guardarDatos();
+            cerrarModal('modal-fiar');
+        }
+
+        function gestionarPago(id) {
+            const cliente = clientes.find(c => c.id === id);
+            if (!cliente) return;
+            const montoUSDStr = prompt(`¿Cuánto abonará ${cliente.nombre} en Dólares ($)?:`);
+            const montoUSD = parseFloat(montoUSDStr);
+            if (isNaN(montoUSD) || montoUSD <= 0) { alert('Monto inválido.'); return; }
+
+            cliente.saldo = Math.max(0, cliente.saldo - montoUSD);
+            cliente.puntaje += 15;
+            finanzas.unshift({ id: Date.now(), fecha: new Date().toISOString().split('T')[0], tipo: 'ingreso', desc: `Abono de: ${cliente.nombre}`, monto: montoUSD });
+            guardarDatos();
+        }
+
+        function verHistorialCliente(id) {
+            const cliente = clientes.find(c => c.id === id);
+            if (!cliente) return;
+            document.getElementById('historial-titulo').innerText = `Historial: ${cliente.nombre}`;
+            const tbody = document.getElementById('tabla-historial-cliente').querySelector('tbody');
+            tbody.innerHTML = '';
+            if (!cliente.historial || cliente.historial.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Sin registros de fiados.</td></tr>`;
+            } else {
+                cliente.historial.forEach(h => {
+                    tbody.innerHTML += `<tr><td>${h.fecha}</td><td>${h.detalle}</td><td class="currency-usd">$${h.monto.toFixed(2)}</td></tr>`;
+                });
+            }
+            document.getElementById('modal-historial').style.display = 'flex';
+        }
+
+        function registrarFinanza() {
+            const tipo = document.getElementById('finanza-tipo').value;
+            const fecha = document.getElementById('finanza-fecha').value;
+            const desc = document.getElementById('finanza-desc').value.trim();
+            const monto = parseFloat(document.getElementById('finanza-monto').value);
+            if (!fecha || !desc || isNaN(monto) || monto <= 0) { alert('Complete todos los campos.'); return; }
+            finanzas.unshift({ id: Date.now(), fecha, tipo, desc, monto });
+            document.getElementById('finanza-desc').value = '';
+            document.getElementById('finanza-monto').value = '';
+            guardarDatos();
+        }
+
+        function eliminarFinanza(id) {
+            finanzas = finanzas.filter(f => f.id !== id);
+            guardarDatos();
+        }
+
+        function exportarRespaldo() {
+            const datosBackup = { tasaBcv: tasaBCV, tasaParalelo: tasaParalelo, articulos, clientes, finanzas, fechaRespaldo: new Date().toISOString() };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(datosBackup));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `respaldo_carniceria_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importarRespaldo(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const contenido = JSON.parse(e.target.result);
+                    if (contenido.articulos && contenido.clientes) {
+                        articulos = contenido.articulos;
+                        clientes = contenido.clientes;
+                        finanzas = contenido.finanzas || [];
+                        if (contenido.tasaBcv) { tasaBCV = contenido.tasaBcv; document.getElementById('tasa-bcv').value = tasaBCV; localStorage.setItem('carniceria_tasa_bcv', tasaBCV); }
+                        if (contenido.tasaParalelo) { tasaParalelo = contenido.tasaParalelo; document.getElementById('tasa-paralelo').value = tasaParalelo; localStorage.setItem('carniceria_tasa_par', tasaParalelo); }
+                        guardarDatos();
+                        alert('¡Respaldo cargado con éxito!');
+                    } else { alert('Formato de archivo incorrecto.'); }
+                } catch (err) { alert('Error al leer el archivo.'); }
+            };
+            reader.readAsText(file);
+        }
+
+        function obtenerBadgePuntaje(puntaje) {
+            if (puntaje >= 30) return `<span class="badge badge-excelente">⭐ ${puntaje} pts</span>`;
+            if (puntaje >= 10) return `<span class="badge badge-regular">⚡ ${puntaje} pts</span>`;
+            return `<span class="badge badge-riesgo">⚠️ ${puntaje} pts</span>`;
+        }
+
+        function actualizarEstadisticasVisuales() {
+            let totalIngresos = 0, totalPerdidas = 0;
+            const tbodyFin = document.getElementById('tabla-finanzas').querySelector('tbody');
+            tbodyFin.innerHTML = '';
+            finanzas.forEach(f => {
+                if (f.tipo === 'ingreso') totalIngresos += f.monto; else totalPerdidas += f.monto;
+                tbodyFin.innerHTML += `<tr><td>${f.fecha}</td><td><span class="badge ${f.tipo === 'ingreso' ? 'badge-ingreso' : 'badge-perdida'}">${f.tipo.toUpperCase()}</span></td><td>${f.desc}</td><td class="currency-usd">$${f.monto.toFixed(2)}</td><td><button class="btn-action btn-del" onclick="eliminarFinanza(${f.id})">🗑️</button></td></tr>`;
+            });
+            let balanceNeto = totalIngresos - totalPerdidas;
+            document.getElementById('stat-total-ingresos').innerText = `$${totalIngresos.toFixed(2)}`;
+            document.getElementById('stat-total-ingresos-bcv').innerText = `Bs: ${(totalIngresos * tasaBCV).toFixed(2)}`;
+            document.getElementById('stat-total-perdidas').innerText = `$${totalPerdidas.toFixed(2)}`;
+            document.getElementById('stat-total-perdidas-bcv').innerText = `Bs: ${(totalPerdidas * tasaBCV).toFixed(2)}`;
+            const balEl = document.getElementById('stat-balance-neto');
+            balEl.innerText = `$${balanceNeto.toFixed(2)}`;
+            balEl.style.color = balanceNeto >= 0 ? 'var(--success)' : 'var(--danger)';
+
+            let maxVal = Math.max(totalIngresos, totalPerdidas, 1);
+            document.getElementById('bar-ingresos').style.width = `${(totalIngresos / maxVal) * 100}%`;
+            document.getElementById('chart-txt-ingresos').innerText = `$${totalIngresos.toFixed(2)}`;
+            document.getElementById('bar-perdidas').style.width = `${(totalPerdidas / maxVal) * 100}%`;
+            document.getElementById('chart-txt-perdidas').innerText = `$${totalPerdidas.toFixed(2)}`;
+
+            let conteoArticulos = {};
+            clientes.forEach(c => { if(c.historial) c.historial.forEach(h => { if(h.articuloNombre) conteoArticulos[h.articuloNombre] = (conteoArticulos[h.articuloNombre] || 0) + 1; }); });
+            const tbodyArtVendidos = document.getElementById('tabla-articulos-vendidos').querySelector('tbody');
+            tbodyArtVendidos.innerHTML = '';
+            let keys = Object.keys(conteoArticulos);
+            if(keys.length === 0) { tbodyArtVendidos.innerHTML = `<tr><td colspan="2" style="text-align:center;">Sin registros recientes.</td></tr>`; }
+            else { keys.forEach(k => { tbodyArtVendidos.innerHTML += `<tr><td><strong>${k}</strong></td><td>${conteoArticulos[k]} veces</td></tr>`; }); }
+        }
+
+        function actualizarVista(filtro = '') {
+            const tbodyArt = document.getElementById('tabla-articulos').querySelector('tbody');
+            tbodyArt.innerHTML = '';
+            articulos.forEach(art => {
+                tbodyArt.innerHTML += `<tr><td><strong>${art.nombre}</strong></td><td><div class="currency-usd">$${art.precio.toFixed(2)}</div><div class="currency-ves">BCV: Bs.${(art.precio*tasaBCV).toFixed(2)}</div></td><td><button class="btn-action btn-del" onclick="eliminarArticulo(${art.id})">🗑️</button></td></tr>`;
+            });
+
+            const tbodyCli = document.getElementById('tabla-clientes').querySelector('tbody');
+            tbodyCli.innerHTML = '';
+            let deudaTotalUSD = 0;
+
+            clientes.filter(c => c.nombre.toLowerCase().includes(filtro)).forEach(cli => {
+                deudaTotalUSD += cli.saldo;
+                tbodyCli.innerHTML += `<tr><td><div style="display:flex; justify-content:space-between; align-items:center;"><strong>${cli.nombre}</strong><button class="btn-action btn-del" style="padding:2px 4px; font-size:0.6rem;" onclick="eliminarCliente(${cli.id})">❌</button></div><div style="font-size:0.7rem; color:var(--text-muted);">📱 ${cli.telefono || 'S/T'}</div><div style="display:flex; gap:4px; align-items:center; margin-top:2px;">${obtenerBadgePuntaje(cli.puntaje)}<button class="btn-action btn-hist" style="padding:1px 4px; font-size:0.65rem;" onclick="verHistorialCliente(${cli.id})">📜 Historial</button></div></td><td><div class="currency-usd" style="color:${cli.saldo>0?'var(--danger)':'var(--success)'};">$${cli.saldo.toFixed(2)}</div><div class="currency-ves">BCV: Bs.${(cli.saldo*tasaBCV).toFixed(2)}</div></td><td><div class="actions-group"><button class="btn-action btn-fiar" onclick="abrirModalFiar(${cli.id})">+ Fiar</button><button class="btn-action btn-pagar" onclick="gestionarPago(${cli.id})">- Pagar</button></div></td></tr>`;
+            });
+
+            document.getElementById('stat-articulos').innerText = articulos.length;
+            document.getElementById('stat-clientes-total').innerText = clientes.length;
+            document.getElementById('stat-deuda-usd').innerText = `$${deudaTotalUSD.toFixed(2)}`;
+            document.getElementById('stat-deuda-bcv').innerText = `Bs: ${(deudaTotalUSD * tasaBCV).toFixed(2)}`;
+            actualizarEstadisticasVisuales();
+        }
+
+        actualizarVista();
+    </script>
+</body>
+</html>
