@@ -1,9 +1,13 @@
 {
-  "name": "Carnicería App",
-  "short_name": "Carnicería",
-  "start_url": "/",
+  "background_color": "#fa4b4b",
+  "dir": "ltr",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ff0000",
-  "icons": []
+  "name": "soygamer-yt.github",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "soygamer-yt.github",
+  "start_url": "https://soygamer-yt.github.io/Carniceria-1.0/",
+  "theme_color": "#b60707",
+  "id": "1.0.0",
+  "lang": "en"
 }
